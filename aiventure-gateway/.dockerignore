@@ -1,0 +1,67 @@
+# =================================================================
+# DOCKERIGNORE - AIVENTURE GATEWAY
+# =================================================================
+# Fichiers à exclure lors de la construction de l'image Docker
+
+# Répertoires Maven
+target/
+!target/*.jar
+
+# Répertoires de build
+build/
+out/
+
+# Fichiers de configuration locale
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation
+README.md
+HELP.md
+*.md
+
+# Tests
+src/test/
+
+# Scripts (garde docker-entrypoint.sh)
+*.bat
+*.ps1
+
+# Certificats et clés
+*.p12
+*.jks
+*.pem
+*.key
+*.crt

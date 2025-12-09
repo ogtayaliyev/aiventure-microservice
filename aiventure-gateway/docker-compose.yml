@@ -1,0 +1,162 @@
+# =================================================================
+# DOCKER COMPOSE - AIVENTURE GATEWAY STACK
+# =================================================================
+# Stack complète avec PostgreSQL et l'application Spring Boot
+
+services:
+  # =================================================================
+  # BASE DE DONNÉES POSTGRESQL
+  # =================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: aiventure-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aiventure_gateway
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aiventure-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d aiventure_gateway"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # =================================================================
+  # ADMINER - INTERFACE DE GESTION BDD (OPTIONNEL)
+  # =================================================================
+  adminer:
+    image: adminer:4.8.1
+    container_name: aiventure-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks:
+      - aiventure-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # =================================================================
+  # APPLICATION AIVENTURE GATEWAY
+  # =================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aiventure-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Base de données
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aiventure_gateway
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_URL: jdbc:postgresql://postgres:5432/aiventure_gateway
+
+      # Pool de connexions
+      DB_POOL_MAX_SIZE: 20
+      DB_POOL_MIN_IDLE: 5
+      DB_POOL_IDLE_TIMEOUT: 300000
+      DB_POOL_CONNECTION_TIMEOUT: 20000
+      DB_POOL_MAX_LIFETIME: 1200000
+
+      # Serveur
+      SERVER_PORT: 8080
+      SERVER_SSL_ENABLED: "false"
+
+      # JWT
+      JWT_SECRET: AiVenture2024SuperSecureJwtSecretKeyForProductionEnvironmentWithMinimum64Characters123456789
+      JWT_EXPIRATION: 3600000
+      JWT_REFRESH_EXPIRATION: 86400000
+
+      # Utilisateur par défaut
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD}
+      DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL}
+
+      # Microservices (URLs internes Docker)
+      MICROSERVICE_AUTH_URL: http://host.docker.internal:8082
+      MICROSERVICE_AUTH_API_KEY: auth-service-api-key-2024-secure
+      MICROSERVICE_IA_URL: http://host.docker.internal:8083
+      MICROSERVICE_IA_API_KEY: ia-service-api-key-2024-secure
+      MICROSERVICE_SOCIAL_URL: http://host.docker.internal:8084
+      MICROSERVICE_SOCIAL_API_KEY: social-service-api-key-2024-secure
+
+      # Sécurité
+      SECURITY_MAX_FAILED_ATTEMPTS: 5
+      SECURITY_LOCKOUT_DURATION: 15
+      SECURITY_MAX_SESSIONS_PER_USER: 3
+      SECURITY_SESSION_TIMEOUT: 24
+      SECURITY_BCRYPT_ROUNDS: 12
+      ENCRYPTION_SECRET_KEY: AiVenture2024EncryptionSecretKeyForSensitiveData256BitsMinimum!
+
+      # CORS
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8080,https://yourdomain.com"
+      CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Authorization,Content-Type,X-Requested-With,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers"
+      CORS_ALLOW_CREDENTIALS: "true"
+      CORS_MAX_AGE: 3600
+
+      # Monitoring
+      MANAGEMENT_ENDPOINTS_EXPOSURE: "health,info,metrics"
+      MANAGEMENT_SECURITY_ENABLED: "true"
+      ACTUATOR_USERNAME: actuator
+      ACTUATOR_PASSWORD: ActuatorMonitoring2024!Secure
+
+      # Logging
+      LOG_LEVEL_ROOT: INFO
+      LOG_LEVEL_AIVENTURE: INFO
+      LOG_LEVEL_SECURITY: WARN
+      LOG_LEVEL_HIBERNATE: WARN
+      LOG_FILE_PATH: logs/aiventure-gateway.log
+      LOG_MAX_FILE_SIZE: 10MB
+      LOG_MAX_HISTORY: 30
+
+      # Profil Spring
+      SPRING_PROFILES_ACTIVE: docker
+
+    volumes:
+      - app_logs:/app/logs
+    networks:
+      - aiventure-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# =================================================================
+# VOLUMES PERSISTANTS
+# =================================================================
+volumes:
+  postgres_data:
+    driver: local
+    name: aiventure_postgres_data
+  app_logs:
+    driver: local
+    name: aiventure_gateway_logs
+
+# =================================================================
+# RÉSEAU INTERNE
+# =================================================================
+networks:
+  aiventure-network:
+    driver: bridge
+    name: aiventure-network

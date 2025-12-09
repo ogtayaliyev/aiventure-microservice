@@ -1,0 +1,76 @@
+# =================================================================
+# GITIGNORE - AIVENTURE GATEWAY SÉCURISÉ
+# =================================================================
+
+# =================================================================
+# ⚠️ FICHIERS SENSIBLES - SÉCURITÉ CRITIQUE
+# =================================================================
+.env
+.env.*
+*.env
+application-secrets.properties
+application-prod.properties
+keystore*
+truststore*
+*.p12
+*.jks
+*.crt
+*.key
+*.pem
+private_key*
+*secret*
+*password*
+*.log
+
+# =================================================================
+# BUILD ET COMPILATION
+# =================================================================
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# =================================================================
+# BASE DE DONNÉES ET LOGS
+# =================================================================
+*.db
+*.mv.db
+*.trace.db
+logs/
+log/
+
+# =================================================================
+# SYSTÈME
+# =================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
