@@ -49,7 +49,6 @@ Client -> Gateway (Port 8080) -> Microservices
 ### 📚 Documentation API
 
 - **📋 Swagger UI** : Interface interactive pour tester les endpoints
-- **📄 OpenAPI 3.0** : Spécifications complètes de l'API
 - **🔐 JWT Integration** : Authentification directe dans Swagger
 - **📝 Documentation Détaillée** : Descriptions complètes des endpoints
 
